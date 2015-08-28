@@ -1,0 +1,43 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- shiro admin security -->
+    <bean id="shiroSecurityFilter" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/login.do"/>
+        <property name="successUrl" value="/index.do"/>
+        <property name="unauthorizedUrl" value="/unauthorized.html"/>
+        <property name="filters">
+            <map>
+                <entry key="authc" value-ref="myCaptchaFilter"/>
+                <entry key="roles" value-ref="myRolesAuthorizationFilter"/>
+            </map>
+        </property>
+        <property name="filterChainDefinitionMap" ref="chainDefinitionSectionMetaSource"/>
+    </bean>
+    <bean id="chainDefinitionSectionMetaSource" class="com.tarvel.shiro.account.ChainDefinitionSectionMetaSource">
+        <property name="filterChainDefinitions">
+            <value>
+                /login.do = authc
+                /index.do = authc
+                /admin/*  = authc
+            </value>
+        </property>
+    </bean>
+    <bean id="myRolesAuthorizationFilter" class="com.tarvel.shiro.authz.MyRolesAuthorizationFilter"/>
+    <bean id="myCaptchaFilter" class="com.tarvel.shiro.authz.FormAuthenticationCaptchaFilter"/>
+    <bean id="shiroDataBaseRealm" class="com.tarvel.shiro.realm.ShiroDataBaseRealm">
+        <property name="authorizationCacheName" value="shiroAuthorizationCache"/>
+    </bean>
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="shiroDataBaseRealm"/>
+        <!--<property name="cacheManager" ref="shiroCacheManager"/>-->
+    </bean>
+
+    <!--<bean id="shiroCacheManager" class="org.apache.shiro.cache.ehcache.EhCacheManager">-->
+        <!--<property name="cacheManager" ref="ehCacheManagerFactory"/>-->
+    <!--</bean>-->
+
+</beans>
